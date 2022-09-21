@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+#/ command: my-print-env:print: "red names and green variables"
+#/ usage: rerun my-print-env:print [ --color_id_name <31>] [ --color_id_var <32>] [ --color_id_for_equals <0>] 
+#/ rerun-variables: RERUN, RERUN_VERSION, RERUN_MODULES, RERUN_MODULE_DIR
+#/ option-variables: COLOR_ID_NAME COLOR_ID_VAR COLOR_ID_FOR_EQUALS
+
+. "$RERUN_MODULE_DIR/lib/functions.sh" "print" || { 
+  echo >&2 "Failed loading function library." ; exit 1 ; 
+}
+
+set -o errexit -o nounset -o pipefail
+
+rerun_options_parse "$@"
+
+NC='\033[0m' # No Color
+
+color_for_name_equal=$(echo "\033[0;${COLOR_ID_FOR_EQUALS}m")
+color_for_name=$(echo "\033[0;${COLOR_ID_NAME}m")
+color_for_variable=$(echo "\033[0;${COLOR_ID_VAR}m")
+
+printenv | while read line; 
+do 
+	name=$(echo $line | cut -d "=" -f 1)
+	value="${!name}"			
+	echo -e "${color_for_name}$name${color_for_name_equal} = ${color_for_variable}$value${NC}"
+done   
+    
+exit $?
+
